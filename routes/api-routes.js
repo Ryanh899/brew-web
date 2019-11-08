@@ -5,6 +5,10 @@ const Promotions = require("../db/promotions");
 const Yelp = require('../db/yelp.js');
 // Redirect Routes
 
+// const authCheck = (response) => {
+
+// }
+
 // Business Routes
 
 // List all businesses
@@ -14,7 +18,6 @@ router.get("/business", (req, res) => {
 
 //get businesses by user
 router.get("/businessuser/:id", (req, res) => {
-  console.log(req.params.id);
   Business.businessByUser(req.params.id, res);
 });
 
@@ -26,7 +29,6 @@ router.get("/cities", (req, res) => {
 // Add Business
 
 router.post("/addBusiness", (req, res) => {
-  console.log(req.body);
   res.send("posted");
   // Business.addBusiness(req.pendingBusiness)
 });
@@ -50,18 +52,20 @@ router.get("/promotion/all/:city", (req, res) => {
 
 // Add Promotion
 router.post("/promotion/add", (req, res) => {
+  console.log(req.body)
   Promotions.addPromotion(req.body, res)
 });
 
 // Delete Promotion
 
 router.post("/promotion/delete/:id", (req, res) => {
+  console.log(req.body)
   Promotions.deletePromotion(req.params.id, res);
 });
 
 // Edit Promotion
 router.put("/promotion/edit", (req, res) => {
-  console.log("back", req.body)
+  console.log(req.body)
   Promotions.editPromotion(req.body, res);
 });
 // Home -> Landing Page

@@ -209,7 +209,7 @@ const AddBusinessForm = props => {
                             display='flex'
                             className={!isValid ? classes.disabledButton : classes.activeButton} >
                             Submit
-                </Button>
+                        </Button>
                     </Grid>
                     {/* end form and address  */}
                 </Grid>

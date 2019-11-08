@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const passportSetup = require('./config/passport-setup');
-const cookieSession = require('cookie-session');
 const passport = require('passport');
 const keys = require('./config/env_config');
 const apiRoutes = require('./routes/api-routes');
@@ -20,12 +19,6 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 app.use(bodyParser.json())
-
-//use cookie encoder to save cookies for one day 
-// app.use(cookieSession({
-//   maxAge: 24 * 60 * 60 * 1000,
-//   keys: [keys.cookieKey]
-// }));
 
 //initialize passport 
 app.use(passport.initialize());

@@ -13,6 +13,7 @@ class MaterialTableDemo extends Component {
       ],
       data: [],
       businessId: "", 
+      user: '', 
     };
   };
   
@@ -30,7 +31,8 @@ class MaterialTableDemo extends Component {
       .then(response => {
         this.setState({
           data: response.data,
-          businessId: this.props.businessId
+          businessId: this.props.businessId,
+          user: this.props.user
         });
       })
       .catch(err => console.log(err));
@@ -82,7 +84,8 @@ class MaterialTableDemo extends Component {
                       business_id: this.props.businessId,
                       promotion_name: newData.name,
                       qtypeople: newData.quantity,
-                      description: newData.description
+                      description: newData.description, 
+                      token: this.props.user.token
                     })
                     .then(function (res) {
                       console.log(res);
@@ -100,6 +103,7 @@ class MaterialTableDemo extends Component {
                   data[data.indexOf(oldData)] = newData;
                   this.setState({ ...this.state, data });
                   let url = '';
+                  newData.token = this.props.user.token
                   {process.env.NODE_ENV === 'production' ? url = "http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/api/promotion/edit" : url = "http://localhost:5000/api/promotion/edit" }
                   axios
                     .put(url, newData)
@@ -121,9 +125,10 @@ class MaterialTableDemo extends Component {
 
                   //deletes item from DB
                   let url = '';
+                  let token = this.props.user.token
                   {process.env.NODE_ENV === 'production' ? url = "http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/api/promotion/delete/" + oldData.promotion_id : url = "http://localhost:5000/api/promotion/delete/" + oldData.promotion_id }
                   axios
-                    .post(url)
+                    .post(url, token)
                     .then(res => {
                       console.log("delete", res);
                     })

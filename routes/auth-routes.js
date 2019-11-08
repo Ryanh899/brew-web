@@ -10,14 +10,23 @@ const CLIENT_HOME_PAGE_URL = 'http://localhost:3000'
 
 // when login is successful, retrieve user info
 router.get("/login/success/:id", async (req, res) => {
-  let userInfo = await User.getUserById(req.params.id)
-  let token =  jwt.sign(userInfo[0], keys.privateKey, {expiresIn: "12h"})
+  console.log(req.params)
+  if (req.params.id !== undefined) {
+    let userInfo = await User.getUserById(req.params.id)
+    let token = jwt.sign(userInfo[0], keys.privateKey, {expiresIn: "6h"})
     res.json({
       success: true,
+      status: 200, 
       message: "user has successfully authenticated",
       user: userInfo[0], 
       token: token
     })
+  } else {
+    res.json({
+      success: false, 
+      message: 'no user id received', 
+    })
+  }
 });
 
 // router.get('/login', function(req, res, next) {
@@ -69,13 +78,19 @@ router.get('/google', passport.authenticate('google', {
 // ); 
 
 // //google auth redirect 
-router.get('/google/redirect', passport.authenticate('google', { session: false }), (req, res) => {
+router.get('/google/redirect', passport.authenticate('google', { session: false }), async (req, res) => {
   console.log(req.user)  
+  // let token = '';
+  // if (req.user) {
+  //   let userInfo = await User.getUserById(req.params.id)
+  //   token = jwt.sign(userInfo[0], keys.privateKey, {expiresIn: "6h"})
+  // } 
+
   if (process.env.NODE_ENV === 'production') {
     // final aws url 
     res.redirect('/splash/' + req.user.id)
   } else {
-    res.redirect('http://localhost:3000/splash/' + req.user.id)
+    res.redirect('http://localhost:3000/splash/' + req.user.id )
   }
 }); 
 

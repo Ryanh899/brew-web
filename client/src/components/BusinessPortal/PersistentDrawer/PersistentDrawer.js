@@ -17,6 +17,8 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import LocalBarIcon from "@material-ui/icons/LocalBar";
 import Grid from "@material-ui/core/Grid";
+import Button from '@material-ui/core/Button'; 
+
 
 const drawerWidth = 240;
 
@@ -88,10 +90,13 @@ export default function PersistentDrawerLeft(props) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+
   let data = props.business.data.map(item => {
     return item.business_name;
   });
+
   const [title, setTitle] = React.useState(data[0]);
+  
   let dataIDs = props.business.data.map(item => {
     return item.id;
   });
@@ -143,9 +148,18 @@ export default function PersistentDrawerLeft(props) {
               </Typography>
             </Grid>
             <Grid item md={2} xs={2}>
-              <Typography> {props.userName}</Typography>
+              <Typography> {props.user.name}</Typography>
             </Grid>
-
+            <Grid item md={2} xs={2}>
+              <Button
+                type="submit"
+                variant="outlined"
+                className={classes.btnSpacing}
+                onClick={() => {props.logOut()}}
+              >
+                Logout
+              </Button>
+            </Grid>
           </Toolbar>
         </Grid>
       </AppBar>

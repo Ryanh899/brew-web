@@ -6,6 +6,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import clsx from "clsx";
 import Container from "@material-ui/core/Container";
+import CircularProgress from '@material-ui/core/CircularProgress'; 
+import Grid from '@material-ui/core/Grid'; 
 
 // components
 import Footer from "../../Footer/Footer.js";
@@ -16,7 +18,11 @@ import BusinessTable from "../BusinessTable/BusinessTable.js";
 import AuthService from '../../AuthService.jsx'; 
 
 // set styling
-const useStyles = makeStyles(theme => ({}));
+const useStyles = makeStyles(theme => ({
+  loading: {
+    justifyContent:'center'
+  }
+}));
 
 // render dashboard
 export default function Dashboard(props) {
@@ -36,42 +42,46 @@ export default function Dashboard(props) {
   //on mount, we get business User using an ID and update the state
   useEffect(() => {
     let url = ''
-    console.log(props.user)
   if (process.env.NODE_ENV === 'production') {
     url = 'http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/api/businessuser/'
   } else {
     url = 'http://localhost:3000/api/businessuser/'
   }
-    if (props.user) {
-      axios
-        .get(url + props.user.id)
-        .then(function (res) {
-          setBusinessInformation(res);
-          setCurrentBusiness(res.data[0].id);
-          setHasBusiness(true);
-          setUser(props.user[0]); 
-        }).catch(err => err); 
-    } else if (props.location.user) {
-      axios
-        .get(url + props.location.user.id)
-        .then(function (res) {
-          setBusinessInformation(res);
-          setCurrentBusiness(res.data[0].id);
-          setHasBusiness(true);
-          setUser(props.location.user[0]); 
-        }).catch(err => err); 
-    } else if (user.length === 0) {
-        let profile = Auth.getProfile(); 
+  
+    if (Auth.loggedIn()) {
+      let user = Auth.getProfile(); 
+      if (user.user_type === 'businessuser') {
         axios
-        .get(url + profile.id)
-        .then(function (res) {
-          setBusinessInformation(res);
-          setCurrentBusiness(res.data[0].id);
-          setHasBusiness(true);
-          setUser(profile); 
-        }).catch(err => err); 
-    }
+          .get(url + user.id)
+          .then(function (res) {
+            setBusinessInformation(res);
+            setCurrentBusiness(res.data[0].id);
+            setHasBusiness(true);
+            setUser(user); 
+          }).catch(err => err); 
+      } else {
+        props.history.push({
+          pathname: '/',
+        })
+        return 
+      }
+    } else {
+      props.history.push({
+        pathname: '/',
+      })
+    }; 
   }, [props.user]);
+
+  const logOutRedirect = () => {
+    props.history.push({
+        pathname: '/',
+      })
+  }; 
+
+  const logOut = () => {
+    Auth.logout(); 
+    logOutRedirect(); 
+  }
 
   const currentBusinessChange = id => {
     console.log("setting");
@@ -84,10 +94,20 @@ export default function Dashboard(props) {
         <PersistentDrawer
           business={businessInformation}
           currentBusinessChange={currentBusinessChange}
-          // userName={user.name}
+          user={user}
+          logOut={logOut}
         />
       ) : (
-          console.log("Drawer not mounted")
+        <Grid
+        container
+        className={classes.loading}
+        >
+          <Grid
+          item 
+          >
+            <CircularProgress />
+          </Grid>
+        </Grid>
         )}
 
       <main
@@ -98,13 +118,18 @@ export default function Dashboard(props) {
         <Container maxWidth="lg">
           <div>
             {hasBusiness ? (
-              <BusinessTable businessId={currentBusiness} />
+              <BusinessTable user={user} businessId={currentBusiness} />
             ) : (
                 console.log("not mounted")
               )}
           </div>
         </Container>
+        {businessInformation ? (
         <Footer />
+      ) : (
+        console.log('no user')
+        )}
+        
       </main>
     </div>
   );

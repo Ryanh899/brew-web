@@ -70,18 +70,20 @@ class Splash extends Component {
             claimBusiness: false
         };
     };
-
+    // sets claimbusiness to true triggering addBusiness form to open 
     claimBusinessClick = () => {
         this.setState({
             claimBusiness: true
         });
     };
 
+    // sets claimbusiness to true triggering addBusiness form to close 
     closeForm = () => {
         this.setState({
             claimBusiness: false
         });
     };
+
 
     render(props) {
         const { classes } = this.props;
@@ -94,7 +96,7 @@ class Splash extends Component {
                     <Grid item xs={false} sm={4} md={7} className={classes.image} />
                     <Grid className={classes.content} item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
                         <div className={classes.paper}>
-
+                        {/* heading */}
                             <Animated
                                 animationIn="slideInDown"
                             >
@@ -110,31 +112,46 @@ class Splash extends Component {
                             </Typography>
                                 <hr className="divider" />
                             </Animated>
-
-                            {this.props.authenticated && this.props.user.user_type === 'businessuser' ? (
+                            {/* if authenticated and not a business user render button to render claim business form */}
+                            {this.props.authenticated === true && this.props.user.user_type === 'user' ? (
                                 <Button
-                                    className={classes.btnSpacing}
+                                    type="submit"
                                     fullWidth
                                     variant="outlined"
                                     color="secondary"
-                                    onClick={() => { this.props.goToDashboard() }}
+                                    className={classes.btnSpacing}
+                                    onClick={() => {this.claimBusinessClick()}}
                                 >
-                                    Business Dashboard
-                            </Button>
+                                    Claim Your Business
+                                </Button>
                             ) : (
-                                    <Animated
-                                        animationIn="flash"
-                                        animationInDelay={2000}
-                                    >
-                                        <BusinessSignIn
-                                            user={this.props.user}
-                                            handleClaimClick={this.claimBusinessClick}
-                                            authenticated={this.props.authenticated}
-                                        />
-                                    </Animated>
-
-                                )}
-
+                                //  else render business sign in component 
+                                <Animated
+                                animationIn="flash"
+                                animationInDelay={2000}
+                                >
+                                    <BusinessSignIn
+                                        user={this.props.user}
+                                        authenticated={this.props.authenticated}
+                                        dashboardClick={this.props.goToDashboard}
+                                    />
+                                </Animated>
+                            )}
+                            {this.props.authenticated ? (
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="outlined"
+                                color="secondary"
+                                className={classes.btnSpacing}
+                                onClick={() => {this.props.logOut()}}
+                            >
+                                Logout
+                            </Button> 
+                            ) : (
+                                <div></div>
+                            )}
+                            {/* if claimBusiness in state is true render the form if not render nothing */}
                             {showForm ? <AddBusiness user={this.props.user} closeForm={this.closeForm} /> : <div></div>}
 
                             <Animated

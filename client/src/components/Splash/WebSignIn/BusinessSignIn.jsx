@@ -25,13 +25,18 @@ const handleLogInClicks = () => {
     if (process.env.NODE_ENV === 'production') {
         url = "http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/auth/google/"
     } else {
-        url = "http://localhost:5000/auth/google/"
+        url = "http://localhost:5000/auth/google"
     }
     window.open(url, "_self"); // REFACTOR FROM 3000 to 5000
 };
 
+
+
 // render components
 export default function BusinessSignIn(props) {
+    const handleClaim = () => {
+        props.handleClaimClick()
+    }
     const classes = useStyles();
     if (props.authenticated && props.user.user_type === 'businessuser') {
         return (
@@ -41,36 +46,10 @@ export default function BusinessSignIn(props) {
                 variant="outlined"
                 color="secondary"
                 className={classes.btnSpacing}
-                onClick={props.ButtonClick}
+                onClick={() => {props.dashboardClick()}}
             >
                 Business Dashboard
                     </Button>
-        );
-    } else if (props.authenticated === false) {
-        return (
-            <Button
-                type="submit"
-                fullWidth
-                variant="outlined"
-                color="secondary"
-                className={classes.btnSpacing}
-                onClick={handleLogInClicks}
-            >
-                Login in with Google
-            </Button>
-        );
-    } else if (props.authenticated) {
-        return (
-            <Button
-                type="submit"
-                fullWidth
-                variant="outlined"
-                color="secondary"
-                className={classes.btnSpacing}
-                onClick={() => props.handleClaimClick()} // REFACTOR method not handled properly
-            >
-                Claim a business
-            </Button>
         );
     } else {
         return (

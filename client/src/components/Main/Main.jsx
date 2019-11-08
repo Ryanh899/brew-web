@@ -3,22 +3,10 @@ import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import PropTypes from "prop-types";
 import AuthService from '../AuthService.jsx'; 
-
+import decode from 'jwt-decode';
 // components
 import Splash from '../Splash/Splash.jsx';
-import Dashboard from '../BusinessPortal/Dashboard/Dashboard.js';
-
-// router 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link, 
-  withRouter, 
-  useParams
-} from "react-router-dom";
-import PrivateRoute from '../../PrivateRoute'; 
-
+// setting theme
 const theme = createMuiTheme({
   palette: {
     type: 'light', // 'light', 'dark', manualColor
@@ -29,7 +17,8 @@ const theme = createMuiTheme({
 class Main extends Component {
   constructor (props) {
     super(props) 
-    this.Auth = new AuthService();
+    // going to need to switch to aws url
+    this.Auth = new AuthService('http://localhost:3000/');
   }
   // static props for user info 
   static propTypes = {
@@ -40,6 +29,7 @@ class Main extends Component {
       user_type: PropTypes.string,
       id: PropTypes.number
     }), 
+    // static props for routing purposes
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired
@@ -52,37 +42,69 @@ class Main extends Component {
     error: null,
     authenticated: false
   };
-//   componentWillMount() {
-//     if (!this.Auth.loggedIn()) {
-//         this.props.history.replace('/login')
-//     }
-//     else {
-//         try {
-//             const profile = this.Auth.getProfile()
-//             this.setState({
-//                 user: profile, 
-//                 authenticated: true
-//             })
-//         }
-//         catch(err){
-//             this.Auth.logout()
-//             this.props.history.replace('/login')
-//         }
-//     }
-// }
-  // because we are using cookies on mount it will check for authenticated users 
-  componentDidMount() {
-    console.log(this.props.match)
+
+  // on mount check for authentication 
+  async componentDidMount() {
+    // if in production use aws route else use local host
     let url = ''; 
     if (process.env.NODE_ENV === 'production') {
       url = 'http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/auth/login/success/'; 
     } else {
-      url = 'http://localhost:5000/auth/login/success/"'; 
+      url = 'http://localhost:5000/auth/login/success/'; 
     }
-    // hits auth/login/success on node server 
-    fetch(url + this.props.match.params.user, {
+    // if (this.Auth.loggedIn()) {
+    //   let thisUser = await this.Auth.getProfile(); 
+    //   if (this.props.match.params.user === thisUser.id) {
+    //     alert('authenticated')
+    //   } else {
+    //     alert('not authenticated')
+    //   }
+    // }
+
+
+    // if a user id is present in req.params get user info else return
+    let userId = ''; 
+    // if (this.props.match.params.user) {
+    //   let thisUser = ''; 
+    //   if (this.Auth.loggedIn()) {
+    //     thisUser = await this.Auth.getProfile(); 
+    //     if (this.props.match.params.user === thisUser.id) {
+    //       userId = this.props.match.params.user; 
+    //     } 
+    //   } 
+      
+    // } 
+    // if their is a jwt token present get the user info with that and log them in
+    if (this.Auth.loggedIn()) {
+      let user = this.Auth.getProfile();  
+      //set authenticated to true and make the user obejct = the authenticated in user in app component
+      this.props.getUser(user)
+      // sets user and authenticated state for this component 
+      this.setState({
+        authenticated: true,
+        user: user
+      });
+      return 
+    } 
+    else if (this.props.match.params.user && this.Auth.loggedIn()) {
+        let thisUser = ''; 
+        thisUser = await this.Auth.getProfile(); 
+        console.log(thisUser)
+        if (this.props.match.params.user === thisUser.id) {
+          userId = this.props.match.params.user; 
+        } 
+    }
+     else if (this.props.match.params.user) {
+      userId = this.props.match.params.user
+    }
+
+
+
+    // if no jwt token but there is a user id hit auth/login/success on node server passing a user id 
+    fetch(url + userId, {
       method: "GET",
       // credentials: "include",
+
       // cors headers
       headers: {
         Accept: "application/json",
@@ -91,19 +113,32 @@ class Main extends Component {
       }, 
     })
       .then(response => {
-        //if success return the response || user info 
+        //if successful return the response json formatted || user info 
         if (response.status === 200) return response.json();
         throw new Error("failed to authenticate user");
       })
-      .then(responseJson => {
+      .then(async responseJson => {
         console.log(responseJson)
-        //set authenticated to true and make the user obejct = the authenticated in user 
-        this.props.getUser(responseJson.user)
-        this.Auth.setToken(responseJson.token)
-        this.setState({
+          // sets jwt token in local storage
+          this.Auth.setToken(responseJson.token); 
+          let user = await this.Auth.getProfile();
+          user.token = responseJson.token
+          return user
+      }).then(async response => {
+        console.log(response)
+        let idCheck = await decode(response.token);
+        console.log(idCheck)
+        if (idCheck.id == this.props.match.params.user) {
+        //set authenticated to true and make the user obejct = the authenticated in user in app component
+         this.props.getUser(response.user)
+        // sets user and authenticated state for this component 
+         this.setState({
           authenticated: true,
-          user: responseJson.user
+          user: response
         });
+        } else {
+          return 
+        }
       })
       .catch(error => {
         //if authentication fails 
@@ -115,21 +150,38 @@ class Main extends Component {
       });
   };
 
+  // log user out
+  logOut = () => {
+    this.Auth.logout(); 
+    if (!this.Auth.loggedIn()) {
+      this.setState({
+        authenticated: false, 
+        user: null
+      })
+    }
+    this.props.history.push({
+      pathname: '/',
+    })
+  }; 
+
+  // function to route to dashboard passing user info
   goToDashboard = () => {
+    if (this.Auth.loggedIn() && this.state.user.user_type === 'businessuser')
     this.props.history.push({
         pathname: '/dashboard',
         user: this.state.user,
-        isAuthenticated: true
+        isAuthenticated: true,
+        logOut: this.logOut
       })
-  }
-
+  }; 
 
   render() {
+    // setting react router data in props object
     const { match, location, history } = this.props;
     return (
       <div className="container">
         <ThemeProvider theme={theme} >
-          <Splash user_id={match.params} user={this.state.user} goToDashboard={this.goToDashboard} authenticated={this.state.authenticated} />
+          <Splash user_id={match.params} user={this.state.user} logOut={this.logOut} goToDashboard={this.goToDashboard} authenticated={this.state.authenticated} />
         </ThemeProvider>
       </div>
     );
