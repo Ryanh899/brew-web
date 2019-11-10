@@ -51,6 +51,19 @@ export default function BusinessSignIn(props) {
                 Business Dashboard
                     </Button>
         );
+    } else if (props.authenticated && props.user.user.user_type === 'businessuser') {
+        return (
+            <Button
+                type="submit"
+                fullWidth
+                variant="outlined"
+                color="secondary"
+                className={classes.btnSpacing}
+                onClick={() => {props.dashboardClick()}}
+            >
+                Business Dashboard
+                    </Button>
+        );
     } else {
         return (
             <Button

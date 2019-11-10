@@ -52,28 +52,8 @@ class Main extends Component {
     } else {
       url = 'http://localhost:5000/auth/login/success/'; 
     }
-    // if (this.Auth.loggedIn()) {
-    //   let thisUser = await this.Auth.getProfile(); 
-    //   if (this.props.match.params.user === thisUser.id) {
-    //     alert('authenticated')
-    //   } else {
-    //     alert('not authenticated')
-    //   }
-    // }
-
-
-    // if a user id is present in req.params get user info else return
+    // id to use for fetch
     let userId = ''; 
-    // if (this.props.match.params.user) {
-    //   let thisUser = ''; 
-    //   if (this.Auth.loggedIn()) {
-    //     thisUser = await this.Auth.getProfile(); 
-    //     if (this.props.match.params.user === thisUser.id) {
-    //       userId = this.props.match.params.user; 
-    //     } 
-    //   } 
-      
-    // } 
     // if their is a jwt token present get the user info with that and log them in
     if (this.Auth.loggedIn()) {
       let user = this.Auth.getProfile();  
@@ -86,6 +66,7 @@ class Main extends Component {
       });
       return 
     } 
+    // if there is a user in the url and they are logged in, might never happen
     else if (this.props.match.params.user && this.Auth.loggedIn()) {
         let thisUser = ''; 
         thisUser = await this.Auth.getProfile(); 
@@ -94,8 +75,11 @@ class Main extends Component {
           userId = this.props.match.params.user; 
         } 
     }
+    // if there is an id token in url
      else if (this.props.match.params.user) {
-      userId = this.props.match.params.user
+      //  decode token, get id, send to fetch request
+      let userToken = decode(this.props.match.params.user)
+      userId = userToken.id
     }
 
 
@@ -104,7 +88,6 @@ class Main extends Component {
     fetch(url + userId, {
       method: "GET",
       // credentials: "include",
-
       // cors headers
       headers: {
         Accept: "application/json",
@@ -121,24 +104,13 @@ class Main extends Component {
         console.log(responseJson)
           // sets jwt token in local storage
           this.Auth.setToken(responseJson.token); 
-          let user = await this.Auth.getProfile();
-          user.token = responseJson.token
-          return user
-      }).then(async response => {
-        console.log(response)
-        let idCheck = await decode(response.token);
-        console.log(idCheck)
-        if (idCheck.id == this.props.match.params.user) {
-        //set authenticated to true and make the user obejct = the authenticated in user in app component
-         this.props.getUser(response.user)
-        // sets user and authenticated state for this component 
-         this.setState({
-          authenticated: true,
-          user: response
-        });
-        } else {
-          return 
-        }
+          //set authenticated to true and make the user obejct = the authenticated in user in app component
+         this.props.getUser(responseJson.user)
+         // sets user and authenticated state for this component 
+          this.setState({
+           authenticated: true,
+           user: responseJson
+         });
       })
       .catch(error => {
         //if authentication fails 
@@ -147,6 +119,7 @@ class Main extends Component {
           authenticated: false,
           error: "Failed to authenticate user"
         });
+        
       });
   };
 

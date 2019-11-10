@@ -59,7 +59,7 @@ class App extends Component {
       <div>
         <Switch>
           <Route exact path="/" render={(props) => <Main {...props}  getUser={this.getUser} />} />
-          <Route exact path="/splash/:user/:token" render={(props) => <Main {...props}  getUser={this.getUser} />} />
+          <Route exact path="/splash/:user" render={(props) => <Main {...props}  getUser={this.getUser} />} />
           <Route exact path="/dashboard" render={(props) => <Dashboard {...props} user={this.state.user} />} />
           {/* <PrivateRoute exact path="/dashboard" component={Dashboard} /> */}
           <Route component={NotFound} />
