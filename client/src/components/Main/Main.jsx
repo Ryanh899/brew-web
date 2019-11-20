@@ -139,8 +139,7 @@ class Main extends Component {
 
   // function to route to dashboard passing user info
   goToDashboard = () => {
-    if (this.Auth.loggedIn() && this.state.user.user_type === 'businessuser')
-    this.props.history.push({
+      this.props.history.push({
         pathname: '/dashboard',
         user: this.state.user,
         isAuthenticated: true,

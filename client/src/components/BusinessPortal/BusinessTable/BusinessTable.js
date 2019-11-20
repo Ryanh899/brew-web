@@ -38,7 +38,7 @@ class MaterialTableDemo extends Component {
       .catch(err => console.log(err));
   };
 
-  componentDidUpdate() {
+  componentDidUpdate(snapshot, prevState) {
     let url = ''; 
     if (process.env.NODE_ENV === 'production') {
       url = 'http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/api/promotion/all/business/' + this.props.businessId;
@@ -55,7 +55,7 @@ class MaterialTableDemo extends Component {
           });
         })
         .catch(err => console.log(err));
-    }
+    } 
   };
 
   render() {
@@ -107,8 +107,8 @@ class MaterialTableDemo extends Component {
                   {process.env.NODE_ENV === 'production' ? url = "http://ec2-3-14-27-130.us-east-2.compute.amazonaws.com/api/promotion/edit" : url = "http://localhost:5000/api/promotion/edit" }
                   axios
                     .put(url, newData)
-                    .then(function (res) {
-                      console.log(res);
+                    .then((res) => {
+                      console.log(JSON.parse(res.config.data));
                     })
                     .catch(function (err) {
                       if (err) throw err;

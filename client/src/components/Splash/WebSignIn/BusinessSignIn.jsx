@@ -49,7 +49,7 @@ export default function BusinessSignIn(props) {
                 onClick={() => {props.dashboardClick()}}
             >
                 Business Dashboard
-                    </Button>
+            </Button>
         );
     } else if (props.authenticated && props.user.user.user_type === 'businessuser') {
         return (
@@ -62,7 +62,7 @@ export default function BusinessSignIn(props) {
                 onClick={() => {props.dashboardClick()}}
             >
                 Business Dashboard
-                    </Button>
+            </Button>
         );
     } else {
         return (

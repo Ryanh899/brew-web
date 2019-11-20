@@ -1,12 +1,13 @@
+const keys = require('./config/env_config'); 
 //set the development config for knex to connect to pgsql 
 module.exports = {
   development: {
     client: 'pg',
     connection: {
-      host : 'ec2-54-221-215-228.compute-1.amazonaws.com',
-      user : 'mxqchuznyjooit',
-      password : '7d9afdd8b8ca128b0663917f48b8e97045589cad5d377f110f6c723eec405eb2',
-      database : 'df43ba9t22510r',
+      host : keys.dbHost,
+      user : keys.dbUser,
+      password : keys.dbPassword,
+      database : keys.db,
       charset: 'utf8', 
       ssl: true
     },
@@ -20,10 +21,10 @@ module.exports = {
   staging: {
     client: 'pg',
     connection: {
-      host : 'ec2-54-221-215-228.compute-1.amazonaws.com',
-      user : 'mxqchuznyjooit',
-      password : '7d9afdd8b8ca128b0663917f48b8e97045589cad5d377f110f6c723eec405eb2',
-      database : 'df43ba9t22510r',
+      host : keys.dbHost,
+      user : keys.dbUser,
+      password : keys.dbPassword,
+      database : keys.db,
       charset: 'utf8', 
       ssl: true
     },
@@ -38,10 +39,10 @@ module.exports = {
   production:{
     client: 'pg',
     connection: {
-      host : 'ec2-54-221-215-228.compute-1.amazonaws.com',
-      user : 'mxqchuznyjooit',
-      password : '7d9afdd8b8ca128b0663917f48b8e97045589cad5d377f110f6c723eec405eb2',
-      database : 'df43ba9t22510r',
+      host : keys.dbHost,
+      user : keys.dbUser,
+      password : keys.dbPassword,
+      database : keys.db,
       charset: 'utf8', 
       ssl: true
     },
